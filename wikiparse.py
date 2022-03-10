@@ -2,6 +2,8 @@
 # ./.myven/Scripts/activate
 # uvicorn wikiparse:app --reload
 
+# check if you can scrap url/robots.txt
+
 from fastapi import FastAPI, Path
 from typing import Optional
 from fastapi.responses import HTMLResponse
