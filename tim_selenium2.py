@@ -26,11 +26,12 @@ search.click()
 search.send_keys("samsung")
 search.send_keys(Keys.RETURN)
 
-offers = driver.find_elements(
-    By.XPATH, '//div[@class="sc-162ysh3-1 dAqvUz sc-EHOje hDVxfb"]')
+
 number_of_pages = 5
 list_of_phones = []
 for num in range(number_of_pages):
+
+    offers = driver.find_elements(By.XPATH, '//div[@class="sc-162ysh3-1 dAqvUz sc-EHOje hDVxfb"]')
     for offer in offers:
         try:
             print(44*'-')
@@ -48,8 +49,12 @@ for num in range(number_of_pages):
         except Exception as e:
             print(e)
 
-    driver.find_element(By.XPATH, "//span[text()='Następna']").click()
-    time.sleep(3)
+
+    next_page = driver.find_element(By.XPATH, "//span[text()='Następna']")
+    next_page.click()
+    time.sleep(1)
+    driver.get(driver.current_url)
+
 
 
 # if span.text and span.text.endswith("zł"):
