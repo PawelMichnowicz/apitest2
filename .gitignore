@@ -1,5 +1,7 @@
 /.myven
 /__pycache__
-/testfolder
-shopparse.py
 
+shopparse.py
+tim_selenium.py
+tim_selenium2.py
+tim_selenium3.py
