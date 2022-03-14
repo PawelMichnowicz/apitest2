@@ -33,11 +33,11 @@ def get_name(url: Optional[str] = 'https://pl.wikipedia.org/wiki/Pies_domowy'):
     return images
 
 
-@app.get('/get-all', response_class=HTMLResponse) 
+@app.get('/get-all', response_class=HTMLResponse) # zgodnie z paradygmatem dry / 1 endpoint /  słownik for xpathy / połacz sel + to
 def get_name(url: Optional[str] = 'https://pl.wikipedia.org/wiki/Pies_domowy'):  
     html = requests.get(url).content
     sel = Selector(text = html)
     list_of_all = sel.xpath("//img | //body//text()").extract()
-    all = ' '.join(list_of_all)
-    return all
+    all_ = ' '.join(list_of_all)
+    return all_
 

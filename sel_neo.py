@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import json
 
-def neo(brand = 'SAMSUNG'):
+def neo(brand = 'SAMSUNG', type_product='TV'):
     brand = brand.upper()
     PATH = r'C:\Program Files (x86)/chromedriver.exe'
 
@@ -26,9 +26,15 @@ def neo(brand = 'SAMSUNG'):
     driver.find_element(By.XPATH, "//button[text()='Zaakceptuj wszystkie']").click()
 
     # choose type of product
-    driver.find_element(By.XPATH, "//a[text()='Smartfony i smartwatche']").click()
-    time.sleep(1.5)
-    driver.find_element(By.XPATH, "//a[text()='Smartfony']").click()
+    if type_product=='Smartphone':
+        driver.find_element(By.XPATH, "//a[text()='Smartfony i smartwatche']").click()
+        time.sleep(1.5)
+        driver.find_element(By.XPATH, "//a[text()='Smartfony']").click()
+    
+    elif type_product=='TV':
+        driver.find_element(By.XPATH, "//a[@class='headerDesktopMenuCss-neo24-link-2U9 '][1]").click()
+        driver.find_element(By.XPATH, "//img[@alt='Telewizory']").click()
+
 
 
     # choose brand
@@ -44,9 +50,20 @@ def neo(brand = 'SAMSUNG'):
     while True:
         names = driver.find_elements(By.XPATH, '//h2/a')
         prices = driver.find_elements(By.XPATH, "//span[@class='uiPriceCss-integer-2sc']")
-        for name, price in zip(names, prices):
-            print(f'name- {name.text}, price-{price.text}')
-            list_of_phones.append({'name':name.text, 'price':price.text})
+
+        if type_product=='Smartphone':
+            for name, price in zip(names, prices):
+                print(f'name- {name.text}, price-{price.text}')
+                list_of_phones.append({'name':name.text, 'price':price.text})
+
+        elif type_product=='TV':
+            resolutions = driver.find_elements(By.XPATH, "//ul[@class='productAttributesCss-neo24-attributes__group-1TN  ']/li[1]/div[2]")
+            for name, resol, price in zip(names, resolutions, prices):
+                print(f'name- {name.text}, resol- {resol.text}, price-{price.text}')
+                list_of_phones.append({'name':name.text, 'resol':resol.text, 'price':price.text})
+
+        else:
+            raise ValueError("Program doesn't recognize this type of product")
 
         try:
             next_page = driver.find_element(By.XPATH, "//button[@aria-label='move to the next page']/span")
@@ -60,5 +77,8 @@ def neo(brand = 'SAMSUNG'):
     data_dict = {}
     data_dict[brand] = list_of_phones
     json_string = json.dumps(data_dict)
-    with open(f'json_files/neo_{brand}.json', 'w+') as f:
+    with open(f'json_files/neo_{brand}_{type_product}.json', 'w+') as f:
         f.write(json_string)
+
+    return True
+

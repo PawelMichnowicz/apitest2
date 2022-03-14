@@ -10,7 +10,7 @@ import time
 import json
 import re
 
-def xkom(brand = 'Samsung'):
+def xkom(brand = 'Samsung', type_product='Smartphone'):
     brand = brand.upper()
     PATH = r'C:\Program Files (x86)/chromedriver.exe'
 
@@ -27,8 +27,14 @@ def xkom(brand = 'Samsung'):
     driver.find_element(By.XPATH, "//button[text()='W porządku']").click()
 
     # choose type of product
-    driver.find_element(By.XPATH, '//ul[@class="sc-1ktmy3g-2 iXwiqH"]/li[2]').click()
-    driver.find_element(By.XPATH, "//span[@class='sc-1tblmgq-0 joe0ba-2 kTwLqk sc-1tblmgq-3 jMzGaB']").click()
+    if type_product=='Smartphone':
+        driver.find_element(By.XPATH, '//ul[@class="sc-1ktmy3g-2 iXwiqH"]/li[2]').click()
+        driver.find_element(By.XPATH, "//span[@class='sc-1tblmgq-0 joe0ba-2 kTwLqk sc-1tblmgq-3 jMzGaB']").click()
+    elif type_product=='TV':
+        driver.find_element(By.XPATH, "//li[@class='sc-13hctwf-3 kOeglL'][6]").click()
+        driver.find_element(By.XPATH, "//span[@class='sc-1tblmgq-0 joe0ba-2 kTwLqk sc-1tblmgq-3 jMzGaB']").click()
+        
+
 
     # choose brand
     brand= brand[0].upper() + brand[1:].lower()
@@ -48,11 +54,22 @@ def xkom(brand = 'Samsung'):
         time.sleep(1.5)
         names = driver.find_elements(By.XPATH, "//span[contains(@style, 'display: -webkit-box;')]")
         prices = driver.find_elements(By.XPATH, "//span[@class='sc-6n68ef-0 sc-6n68ef-3 iepkXv']")
+        if type_product=='TV':
+            resolutions = driver.find_elements(By.XPATH, "//li[contains(text(), 'Przekątna')]")
+            
+        if type_product=='Smartphone':
+            for name, price in zip(names, prices):
+                print(f'name- {name.text}, price-{price.text}')
+                list_of_phones.append({'name':name.text, 'price':price.text})
+        
+        elif type_product=='TV':
+            for name, resol, price in zip(names, resolutions, prices):
+                print(f'name- {name.text}, resol- {resol.text}, price-{price.text}')
+                list_of_phones.append({'name':name.text, 'resol':resol.text, 'price':price.text})
 
-        for name, price in zip(names, prices):
-            print(f'name- {name.text}, price-{price.text}')
-            list_of_phones.append({'name':name.text, 'price':price.text})
-
+        else:
+            raise ValueError("Program doesn't recognize this type of product")
+        
         try:
             next_page = driver.find_element(By.XPATH, "//span[text()='Następna']/..")
             next_page.click()
@@ -67,6 +84,6 @@ def xkom(brand = 'Samsung'):
     data_dict = {}
     data_dict[brand.upper()] = list_of_phones
     json_string = json.dumps(data_dict)
-    with open(f'json_files/xkom_{brand.upper()}.json', 'w+') as f:
+    with open(f'json_files/xkom_{brand.upper()}_{type_product}.json', 'w+') as f:
         f.write(json_string)
 

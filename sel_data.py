@@ -45,15 +45,13 @@ def exact_model(my_list, brand="SAMSUNG"):
 
         return " ".join(model)
 
-
-def shop_max(brand="SAMSUNG"):
+list_of_shops = ['avans', 'neo', 'xkom']
+def shop_max(brand="SAMSUNG", view='min'):
     means = {}
-    list_of_shops = ['avans', 'neo', 'xkom']
     for shop_name in list_of_shops:
 
         with open(f'json_files/{shop_name}_{brand}.json', 'r') as f:
             data = json.loads(f.read())
-
         df = pd.json_normalize(data, record_path=[brand])
 
         try:
@@ -67,7 +65,54 @@ def shop_max(brand="SAMSUNG"):
         df['model'] = df['split_name'].apply(exact_model,  args=[brand])
         df = df[['model', 'price']]
 
-        df = df.groupby('model').mean().round(2)
-        df. rename(columns={'price': shop_name}, inplace=True)
+        if view=='mean':
+            df = df.groupby('model').mean().round(2)
+        elif view=='max':
+            df = df.groupby('model').max().round(2)
+        elif view=='min':
+            df = df.groupby('model').min().round(2)
+
+        df.rename(columns={'price': shop_name}, inplace=True)
         means[shop_name] = df
     return pd.concat([means[shop_name] for shop_name in list_of_shops], axis=1, join="outer")
+
+
+def extract_resol(my_list):
+    for x in my_list:
+        if x.endswith('"') or x.endswith('",'):
+            return x.replace(",","")
+
+
+def shop_TV(brand="SAMSUNG", view='min'):
+    means = {}
+    for shop_name in list_of_shops:
+
+        with open(f'json_files/{shop_name}_{brand}_TV.json', 'r') as f:
+            data = json.loads(f.read())
+        df = pd.json_normalize(data, record_path=[brand])
+
+        try:
+            df['price'] = df.price.astype("int")
+        except ValueError:
+            df['price'] = df['price'].str.split(
+                ',').apply(lambda x: x[0].replace(" ", ""))
+            df['price'] = df.price.astype("int")
+
+        df['resolutions'] = df['resol'].str.split(" ")
+        df['resolution'] =  df['resolutions'].apply(extract_resol)
+
+        df = df[['price', 'resolution']]
+
+        if view=='mean':
+            df = df.groupby('resolution').mean().round(2)
+        elif view=='max':
+            df = df.groupby('resolution').max().round(2)
+        elif view=='min':
+            df = df.groupby('resolution').min().round(2)
+
+        df.rename(columns={'price': shop_name}, inplace=True)
+        means[shop_name] = df
+
+    return pd.concat([means[shop_name] for shop_name in list_of_shops], axis=1, join="outer").sort_index()
+
+
